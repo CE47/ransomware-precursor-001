@@ -1,0 +1,29 @@
+{
+  "name": "Credential dump and recovery inhibition on a flagged Windows host",
+  "description": "Lab rule for the CTIA ransomware-precursor-001 scenario. Windows recorded three process creations for one account on one host, and the three command lines are the classic pre-ransomware staging set: a memory dump of lsass.exe, which is the process that holds every credential cached on that machine; vssadmin delete shadows, which destroys the Volume Shadow Copies; and wbadmin delete catalog, which destroys the Windows backup catalog. Recovery inhibition immediately after credential theft is one of the strongest ransomware-imminent signals there is, so the rule is graded critical with a risk score of 99. The query is deliberately the same one the investigation runs by hand, so the alert count and the count the analyst finds are the same number: three alerts, three documents. It is scoped to the flagged host and account on purpose so the result is unambiguous in a lab, and it is left without a threshold so every one of the three process creations arrives as its own alert rather than being collapsed into one. The time window is deliberately long because this lab ships historical data - that is a lab-only concession, not a production setting; a real deployment would use a short window and alert on the shape of the staging set rather than on a single host.",
+  "type": "query",
+  "risk_score": 99,
+  "severity": "critical",
+  "tags": [
+    "ctia-lab",
+    "ransomware",
+    "precursor",
+    "credential-access",
+    "recovery-inhibition",
+    "impact",
+    "detection-engineering"
+  ],
+  "enabled": true,
+  "interval": "1m",
+  "from": "now-365d",
+  "to": "now",
+  "index": [
+    "auth-*"
+  ],
+  "timeField": "@timestamp",
+  "query": "event.code: 4688 and user.name: \"asmith\" and host.name: \"sec-win-04\"",
+  "language": "kuery",
+  "max_signals": 100,
+  "actions": [],
+  "notify_when": "onActiveAlert"
+}
